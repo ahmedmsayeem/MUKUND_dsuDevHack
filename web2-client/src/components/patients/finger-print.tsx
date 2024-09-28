@@ -1,6 +1,5 @@
-import { FingerprintIcon } from "lucide-react";
-import React, { useState } from "react";
-import { Button } from "~/components/ui/button";
+import React, { useState } from 'react';
+
 
 const passkeyDB: Record<string, Passkey> = {};
 
@@ -11,62 +10,61 @@ const bufferToBase64 = (buffer: ArrayBuffer): string => {
 
 interface RegisterPasskeyProps {
   userID: string;
-  done: React.Dispatch<React.SetStateAction<boolean>>;
+  setFingerBool: 
   
 }
 
-const RegisterPasskey: React.FC<RegisterPasskeyProps> = ({ userID, done }) => {
+const RegisterPasskey: React.FC<RegisterPasskeyProps> = ({ userID }) => {
+  
+
   // Function to register user with WebAuthn
   const registerUser = async () => {
     try {
       // Create a public key credential creation options object
-      const publicKeyCredentialCreationOptions: PublicKeyCredentialCreationOptions =
-        {
-          challenge: Uint8Array.from("randomChallengeString", (c) =>
-            c.charCodeAt(0),
-          ), // Simulated server-generated challenge
-          rp: {
-            name: "Example Corp",
-          },
-          user: {
-            id: Uint8Array.from(userID, (c) => c.charCodeAt(0)),
-            name: userID,
-            displayName: userID,
-          },
-          pubKeyCredParams: [{ alg: -7, type: "public-key" }], // ES256 algorithm
-          timeout: 60000,
-          attestation: "direct",
-        };
+      const publicKeyCredentialCreationOptions: PublicKeyCredentialCreationOptions = {
+        challenge: Uint8Array.from('randomChallengeString', c => c.charCodeAt(0)), // Simulated server-generated challenge
+        rp: {
+          name: 'Example Corp',
+        },
+        user: {
+          id: Uint8Array.from(userID, c => c.charCodeAt(0)),
+          name: userID,
+          displayName: userID,
+        },
+        pubKeyCredParams: [{ alg: -7, type: 'public-key' }], // ES256 algorithm
+        timeout: 60000,
+        attestation: 'direct',
+      };
 
-      const credential = (await navigator.credentials.create({
+      const credential = await navigator.credentials.create({
         publicKey: publicKeyCredentialCreationOptions,
-      })) as PublicKeyCredential;
+      }) as PublicKeyCredential;
 
       if (credential) {
         // Store the passkey in the simulated "DB"
         const rawId = bufferToBase64(credential.rawId);
         passkeyDB[userID] = { id: credential.id, rawId };
-
-        alert(`Passkey successfully registered!`);
-        done(false);
-        let td = new TextDecoder("utf-8");
-
+        
+        alert(`Passkey successfully registered!`)
+        let td = new TextDecoder("utf-8")
+        
         console.log(td.decode(credential.rawId));
+        
       }
     } catch (error) {
-      console.error("Error during registration:", error);
-      alert("Registration failed.");
+      console.error('Error during registration:', error);
+      alert('Registration failed.');
     }
   };
 
   return (
-    <div onClick={registerUser}>
-      <Button className="absolute bottom-20 ml-[6%] p-8" >
-        <FingerprintIcon size={50}></FingerprintIcon>{" "}
-      </Button>
+    <div>
+      <h2>Register with WebAuthn</h2>
+      <button onClick={registerUser}>Register Passkey</button>
     </div>
   );
 };
+
 
 // Simulated DB for storing passkeys
 interface Passkey {
@@ -90,8 +88,8 @@ interface CheckFingerprintProps {
 }
 
 const CheckFingerprint: React.FC<CheckFingerprintProps> = ({ userID }) => {
-  const [username, setUsername] = useState<string>("");
-  const [authStatus, setAuthStatus] = useState<string>("");
+  const [username, setUsername] = useState<string>('');
+  const [authStatus, setAuthStatus] = useState<string>('');
 
   // Function to check fingerprint and validate passkey
   const checkFingerprint = async () => {
@@ -99,37 +97,33 @@ const CheckFingerprint: React.FC<CheckFingerprintProps> = ({ userID }) => {
       const storedPasskey = passkeyDB[userID];
 
       if (!storedPasskey) {
-        setAuthStatus("User not registered");
+        setAuthStatus('User not registered');
         return;
       }
 
-      const publicKeyCredentialRequestOptions: PublicKeyCredentialRequestOptions =
-        {
-          challenge: Uint8Array.from("randomChallengeString", (c) =>
-            c.charCodeAt(0),
-          ), // Simulated server-generated challenge
-          allowCredentials: [
-            {
-              id: base64ToBuffer(storedPasskey.rawId),
-              type: "public-key",
-            },
-          ],
-          userVerification: "preferred",
-          timeout: 60000,
-        };
+      const publicKeyCredentialRequestOptions: PublicKeyCredentialRequestOptions = {
+        challenge: Uint8Array.from('randomChallengeString', c => c.charCodeAt(0)), // Simulated server-generated challenge
+        allowCredentials: [{
+          id:base64ToBuffer(storedPasskey.rawId),
+          type: "public-key"
+        }],
+        userVerification: "preferred",
+        timeout: 60000,
+      };
 
-      const credential = (await navigator.credentials.get({
+      const credential = await navigator.credentials.get({
         publicKey: publicKeyCredentialRequestOptions,
-      })) as PublicKeyCredential;
+      }) as PublicKeyCredential;
 
       if (credential) {
-        setAuthStatus("Authentication successful");
+        setAuthStatus('Authentication successful');
+        
       } else {
-        setAuthStatus("Authentication failed");
+        setAuthStatus('Authentication failed');
       }
     } catch (error) {
-      console.error("Error during authentication:", error);
-      setAuthStatus("Authentication failed.");
+      console.error('Error during authentication:', error);
+      setAuthStatus('Authentication failed.');
     }
   };
 
@@ -150,4 +144,4 @@ const CheckFingerprint: React.FC<CheckFingerprintProps> = ({ userID }) => {
   );
 };
 
-export { CheckFingerprint, RegisterPasskey };
+export {CheckFingerprint,RegisterPasskey};
