@@ -1,0 +1,25 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["omitApi"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  type      String
+  addresses Address[]
+}
+
+model Address {
+  id      Int    @id @default(autoincrement())
+  value   String
+  userId  Int
+  user    User   @relation(fields: [userId], references: [id])
+}
+
