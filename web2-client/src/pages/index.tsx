@@ -40,6 +40,7 @@ export default function Component() {
         }),
       });
     
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const data = await response.json();
       console.log(data);
     };
